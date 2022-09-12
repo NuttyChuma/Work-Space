@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +22,7 @@ class _ColleaguesState extends State<Colleagues> {
   getChats() async {
     String uri = 'http://192.168.3.68:5000/';
     var result = await http
-        .get(Uri.parse('${uri}getAllChats'), headers: <String, String>{
+        .get(Uri.parse('${uri}getAllUsers'), headers: <String, String>{
       "Accept": "application/json",
       "Content-Type": "application/json; charset=UTF-8",
     });
@@ -89,7 +88,7 @@ class _ColleaguesState extends State<Colleagues> {
                         child: CircularProgressIndicator(
                           color: Colors.deepPurple.shade600,
                         ),
-                      )))
+                      ),),),
         ],
       ),
     );

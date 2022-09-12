@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:work_space/Feed/share_with_all_departments_except.dart';
+import 'package:work_space/Feed/share_with_only.dart';
 
 enum SingingCharacter { lafayette, jefferson, just }
 class EventPrivacy extends StatefulWidget {
@@ -11,6 +13,7 @@ class EventPrivacy extends StatefulWidget {
 class _EventPrivacyState extends State<EventPrivacy> {
 
   SingingCharacter? _character = SingingCharacter.lafayette;
+  dynamic globalValue;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,7 @@ class _EventPrivacyState extends State<EventPrivacy> {
           ),
           SliverToBoxAdapter(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
               child: const Text('Choose who can see this event'),
             ),
           ),
@@ -33,7 +36,7 @@ class _EventPrivacyState extends State<EventPrivacy> {
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child:
               ListTile(
-                title: const Text('All Colleagues'),
+                title: const Text('All Departments'),
                 leading: Radio<SingingCharacter>(
                   value: SingingCharacter.jefferson,
                   groupValue: _character,
@@ -50,13 +53,14 @@ class _EventPrivacyState extends State<EventPrivacy> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child:  ListTile(
-                title: const Text('All Colleagues Except...'),
+                title: const Text('All Departments Except...'),
                 leading: Radio<SingingCharacter>(
                   value: SingingCharacter.lafayette,
                   groupValue: _character,
                   onChanged: (SingingCharacter? value) {
                     setState(() {
                       _character = value;
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareWithAllDepartmentsExcept()));
                     });
                   },
                 ),
@@ -74,6 +78,7 @@ class _EventPrivacyState extends State<EventPrivacy> {
                   onChanged: (SingingCharacter? value) {
                     setState(() {
                       _character = value;
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareWithOnly()));
                     });
                   },
                 ),

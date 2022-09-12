@@ -700,5 +700,40 @@
       "department": "Accounting",
       "empNum": "47-900-1713"
     }
+  ],
+
+  "departments": [
+    "Research",
+    "Development",
+    "Human Resources",
+    "Sales",
+    "Business Development",
+    "Services",
+    "Product",
+    "Management",
+    "Legal",
+    "Training",
+    "Support",
+    "Accounting",
+    "Engineering",
+    "Marketing"
+  ],
+  "hiddenDepartments": [
+    {
+      "Research": "false",
+      "Development": "false",
+      "Human Resources": "false",
+      "Sales": "false",
+      "Business Development": "false",
+      "Services": "false",
+      "Product": "false",
+      "Management": "false",
+      "Legal": "false",
+      "Training": "false",
+      "Support": "false",
+      "Accounting": "false",
+      "Engineering": "false",
+      "Marketing": "false"
+    }
   ]
 }

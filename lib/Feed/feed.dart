@@ -41,6 +41,7 @@ class _FeedState extends State<Feed> {
             closeMenuBackgroundColor: Colors.deepPurple.shade600),
         floatingActionButtonWidgetChildren: <FloatingActionButton>[
           FloatingActionButton(
+            heroTag: 'addEvent',
             mini: true,
             onPressed: () {
               //if need to close menu after click
@@ -53,6 +54,7 @@ class _FeedState extends State<Feed> {
             child: const Icon(Icons.event),
           ),
           FloatingActionButton(
+            heroTag: 'addAnnouncement',
             mini: true,
             onPressed: () {
               //if need to toggle menu after click
@@ -68,18 +70,4 @@ class _FeedState extends State<Feed> {
       ),
     );
   }
-
-  // Future addEventDialog() =>
-  //     showDialog(context: context,
-  //         builder: (context) => AlertDialog(
-  //           title: Text('Add Event'),
-  //           content: TextField(
-  //             decoration: InputDecoration(
-  //               border:
-  //             ),
-  //           ),
-  //           actions: [
-  //             TextButton(onPressed: (){}, child: Text('Proceed'))
-  //           ],
-  //         ));
 }
