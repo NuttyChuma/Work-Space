@@ -1,38 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class Colleagues extends StatefulWidget {
-  const Colleagues({Key? key}) : super(key: key);
+  final List? colleagues;
+  const Colleagues(this.colleagues, {Key? key}) : super(key: key);
 
   @override
   State<Colleagues> createState() => _ColleaguesState();
 }
 
 class _ColleaguesState extends State<Colleagues> {
-  @override
-  void initState() {
-    getChats();
-    super.initState();
-  }
-
-  List? colleagues;
-
-  getChats() async {
-    String uri = 'http://192.168.3.68:5000/';
-    var result = await http
-        .get(Uri.parse('${uri}getAllUsers'), headers: <String, String>{
-      "Accept": "application/json",
-      "Content-Type": "application/json; charset=UTF-8",
-    });
-    var json = jsonDecode(result.body).toList()[2]['department'];
-    colleagues = jsonDecode(result.body).toList();
-    setState(() {});
-    debugPrint(json);
-    // debugPrint('${length.length}');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +27,7 @@ class _ColleaguesState extends State<Colleagues> {
                   onPressed: () {}, icon: const Icon(Icons.more_vert_outlined)),
             ],
           ),
-          (colleagues != null)
+          (widget.colleagues != null)
               ? SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -64,12 +40,12 @@ class _ColleaguesState extends State<Colleagues> {
                                 leading: CircleAvatar(
                                   backgroundColor: Colors.deepPurple.shade600,
                                   child: Text(
-                                      '${colleagues![index]['firstName'][0]}'),
+                                      '${widget.colleagues![index]['firstName'][0]}'),
                                 ),
                                 title: Text(
-                                    '${colleagues![index]['firstName']} ${colleagues![index]['lastName']}'),
+                                    '${widget.colleagues![index]['firstName']} ${widget.colleagues![index]['lastName']}'),
                                 subtitle: Text(
-                                    'From ${colleagues![index]['department']}'),
+                                    'From ${widget.colleagues![index]['department']}'),
                                 // trailing: const Icon(Icons.favorite_border),
                               ),
                               const Divider(
@@ -78,7 +54,7 @@ class _ColleaguesState extends State<Colleagues> {
                             ],
                           ));
                     },
-                    childCount: colleagues!.length,
+                    childCount: widget.colleagues!.length,
                   ),
                 )
               : SliverToBoxAdapter(

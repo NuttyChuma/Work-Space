@@ -19,6 +19,7 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
 
   List? departments;
   List? departmentsSharedWithList = [''];
+  String? departmentsSelected;
 
   getDepartments() async {
     String uri = 'http://192.168.3.68:5000/';
@@ -27,20 +28,27 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
       "Accept": "application/json",
       "Content-Type": "application/json; charset=UTF-8",
     });
-    // var departmentsSharedWith = await http
-    //     .get(Uri.parse('${uri}departmentsSharedWithList'), headers: <String, String>{
-    //   "Accept": "application/json",
-    //   "Content-Type": "application/json; charset=UTF-8",
-    // });
-    //
+    var departmentsSharedWith = await http
+        .get(
+        Uri.parse('${uri}departmentsSharedWithList'), headers: <String, String>{
+      "Accept": "application/json",
+      "Content-Type": "application/json; charset=UTF-8",
+    });
+
     departments = jsonDecode(result.body).toList();
-    // departmentsSharedWithList = jsonDecode(departmentsSharedWith.body).toList();
+    departmentsSharedWithList = jsonDecode(departmentsSharedWith.body).toList();
+    if (departmentsSharedWithList!.length > 1) {
+      departmentsSelected =
+      '${departmentsSharedWithList!.length - 1} departments selected';
+    } else {
+      departmentsSelected = 'No departments selected';
+    }
     setState(() {});
   }
 
-  getDepartmentsSharedWithList() async{
+  updateDepartmentsSharedWithList() async {
     String uri = 'http://192.168.3.68:5000/';
-    await http.post(Uri.parse("${uri}updateHiddenDepartmentsList"),
+    await http.post(Uri.parse("${uri}updateDepartmentsSharedWithList"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
@@ -49,6 +57,13 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
           "departmentsSharedWithList": departmentsSharedWithList,
           "userIndex": 0,
         }));
+    if (departmentsSharedWithList!.length > 1) {
+      departmentsSelected =
+      '${departmentsSharedWithList!.length - 1} departments selected';
+    } else {
+      departmentsSelected = 'No departments selected';
+    }
+    setState(() {});
   }
 
   @override
@@ -61,9 +76,13 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
             backgroundColor: Colors.deepPurple.shade300,
             floating: true,
             pinned: true,
-            title: const ListTile(
-              title: Text('Only share event with...', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),),
-              subtitle: Text('No departments selected', style: TextStyle(color: Colors.white),),
+            title: ListTile(
+              title: const Text('Only share event with...', style: TextStyle(
+                  fontWeight: FontWeight.w500, color: Colors.white),),
+              subtitle: (departmentsSelected != null) ? Text(
+                departmentsSelected!,
+                style: const TextStyle(color: Colors.white),):
+                  const Text(""),
             ),
 
           ),
@@ -84,13 +103,26 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
                           ),
                           title: Text(
                               '${departments![index]}'),
-                          trailing: (!departmentsSharedWithList!.contains(departments![index]))? const Icon(Icons.circle_outlined, size: 27,):const Icon(Icons.check_circle),
-                          onTap: (){
+                          trailing: (!departmentsSharedWithList!.contains(
+                              departments![index])) ? const Icon(
+                            Icons.circle_outlined, size: 27,) : const Icon(
+                              Icons.check_circle),
+                          onTap: () {
                             setState(() {
-                              if(departmentsSharedWithList!.contains(departments![index])){
-                                departmentsSharedWithList!.remove(departments![index]);
-                              }else{
-                                departmentsSharedWithList!.add(departments![index]);
+                              if (departmentsSharedWithList!.contains(
+                                  departments![index])) {
+                                departmentsSharedWithList!.remove(
+                                    departments![index]);
+                              } else {
+                                departmentsSharedWithList!.add(
+                                    departments![index]);
+                              }
+                              if (departmentsSharedWithList!.length > 1) {
+                                departmentsSelected =
+                                '${departmentsSharedWithList!.length -
+                                    1} departments selected';
+                              } else {
+                                departmentsSelected = 'No departments selected';
                               }
                             });
                           },
@@ -106,19 +138,25 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
           )
               : SliverToBoxAdapter(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height,
               child: Center(
                 child: CircularProgressIndicator(
                   color: Colors.deepPurple.shade600,
                 ),
               ),),),
+          const SliverToBoxAdapter(
+            child: ListTile(title: Text(""),),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green.shade500,
         elevation: 0.0,
-        onPressed: (){
-          getDepartmentsSharedWithList();
+        onPressed: () {
+          updateDepartmentsSharedWithList();
           Navigator.pop(context);
         },
         child: const Icon(Icons.check_rounded, size: 30, color: Colors.white,),

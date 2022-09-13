@@ -7,10 +7,12 @@ class ShareWithAllDepartmentsExcept extends StatefulWidget {
   const ShareWithAllDepartmentsExcept({Key? key}) : super(key: key);
 
   @override
-  State<ShareWithAllDepartmentsExcept> createState() => _ShareWithAllDepartmentsExceptState();
+  State<ShareWithAllDepartmentsExcept> createState() =>
+      _ShareWithAllDepartmentsExceptState();
 }
 
-class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsExcept> {
+class _ShareWithAllDepartmentsExceptState
+    extends State<ShareWithAllDepartmentsExcept> {
   @override
   void initState() {
     getDepartments();
@@ -19,6 +21,7 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
 
   List? departments;
   List? hiddenDepartmentsList;
+  String? departmentsExcluded;
 
   getDepartments() async {
     String uri = 'http://192.168.3.68:5000/';
@@ -28,17 +31,24 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
       "Content-Type": "application/json; charset=UTF-8",
     });
     var hiddenDepartments = await http
-        .get(Uri.parse('${uri}getHiddenDepartmentsList'), headers: <String, String>{
+        .get(
+        Uri.parse('${uri}getHiddenDepartmentsList'), headers: <String, String>{
       "Accept": "application/json",
       "Content-Type": "application/json; charset=UTF-8",
     });
 
     departments = jsonDecode(result.body).toList();
     hiddenDepartmentsList = jsonDecode(hiddenDepartments.body).toList();
+    if (hiddenDepartmentsList!.length > 1) {
+      departmentsExcluded =
+      '${hiddenDepartmentsList!.length - 1} departments excluded';
+    } else {
+      departmentsExcluded = 'No departments excluded';
+    }
     setState(() {});
   }
 
-  updateHiddenDepartmentsList() async{
+  updateHiddenDepartmentsList() async {
     String uri = 'http://192.168.3.68:5000/';
     await http.post(Uri.parse("${uri}updateHiddenDepartmentsList"),
         headers: <String, String>{
@@ -50,7 +60,7 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
           "userIndex": 0,
         }));
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,9 +71,12 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
             backgroundColor: Colors.deepPurple.shade300,
             floating: true,
             pinned: true,
-            title: const ListTile(
-              title: Text('Hide event from...', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),),
-              subtitle: Text('No departments excluded', style: TextStyle(color: Colors.white),),
+            title: ListTile(
+              title: const Text('Hide event from...', style: TextStyle(
+                  fontWeight: FontWeight.w500, color: Colors.white),),
+              subtitle: (departmentsExcluded != null) ? Text(
+                departmentsExcluded!, style: const TextStyle(color: Colors.white),):
+                  const Text(''),
             ),
 
           ),
@@ -84,16 +97,27 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
                           ),
                           title: Text(
                               '${departments![index]}'),
-                          trailing: (!hiddenDepartmentsList!.contains(departments![index]))? const Icon(Icons.circle_outlined, size: 27,):const Icon(Icons.check_circle),
-                          onTap: (){
+                          trailing: (!hiddenDepartmentsList!.contains(
+                              departments![index])) ? const Icon(
+                            Icons.circle_outlined, size: 27,) : const Icon(
+                              Icons.check_circle),
+                          onTap: () {
                             setState(() {
-                              if(hiddenDepartmentsList!.contains(departments![index])){
-                                hiddenDepartmentsList!.remove(departments![index]);
-                              }else{
+                              if (hiddenDepartmentsList!.contains(
+                                  departments![index])) {
+                                hiddenDepartmentsList!.remove(
+                                    departments![index]);
+                              } else {
                                 hiddenDepartmentsList!.add(departments![index]);
                               }
+                              if (hiddenDepartmentsList!.length > 1) {
+                                departmentsExcluded =
+                                '${hiddenDepartmentsList!.length -
+                                    1} departments excluded';
+                              } else {
+                                departmentsExcluded = 'No departments excluded';
+                              }
                             });
-
                           },
                           // trailing: Icon(Icons.check_circle, color: Colors.red.shade300, size: 27,),
                         ),
@@ -108,7 +132,10 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
           )
               : SliverToBoxAdapter(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height,
               child: Center(
                 child: CircularProgressIndicator(
                   color: Colors.deepPurple.shade600,
@@ -122,7 +149,7 @@ class _ShareWithAllDepartmentsExceptState extends State<ShareWithAllDepartmentsE
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green.shade500,
         elevation: 0.0,
-        onPressed: (){
+        onPressed: () {
           updateHiddenDepartmentsList();
           Navigator.pop(context);
         },

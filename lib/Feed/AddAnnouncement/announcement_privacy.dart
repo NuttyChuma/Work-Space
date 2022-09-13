@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:work_space/Feed/share_with_all_departments_except.dart';
-import 'package:work_space/Feed/share_with_only.dart';
+import 'package:work_space/Feed/AddAnnouncement/share_announcement_with_all_departments_except.dart';
+import 'package:work_space/Feed/AddAnnouncement/share_announcement_with_only.dart';
 
 enum SingingCharacter { lafayette, jefferson, just }
-class EventPrivacy extends StatefulWidget {
-  const EventPrivacy({Key? key}) : super(key: key);
+class AnnouncementPrivacy extends StatefulWidget {
+  const AnnouncementPrivacy({Key? key}) : super(key: key);
 
   @override
-  State<EventPrivacy> createState() => _EventPrivacyState();
+  State<AnnouncementPrivacy> createState() => _AnnouncementPrivacyState();
 }
 
-class _EventPrivacyState extends State<EventPrivacy> {
+class _AnnouncementPrivacyState extends State<AnnouncementPrivacy> {
 
   SingingCharacter? _character = SingingCharacter.lafayette;
   dynamic globalValue;
@@ -23,12 +23,12 @@ class _EventPrivacyState extends State<EventPrivacy> {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.deepPurple.shade300,
-            title: const Text('Event Privacy'),
+            title: const Text('Announcement Privacy'),
           ),
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
-              child: const Text('Choose who can see this event'),
+              child: const Text('Choose who can see this announcement'),
             ),
           ),
           SliverToBoxAdapter(
@@ -46,6 +46,11 @@ class _EventPrivacyState extends State<EventPrivacy> {
                     });
                   },
                 ),
+                onTap: (){
+                  setState(() {
+                    _character = SingingCharacter.jefferson;
+                  });
+                },
               ),
             ),
           ),
@@ -60,10 +65,17 @@ class _EventPrivacyState extends State<EventPrivacy> {
                   onChanged: (SingingCharacter? value) {
                     setState(() {
                       _character = value;
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareWithAllDepartmentsExcept()));
+                      debugPrint("$value");
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareAnnouncementWithAllDepartmentsExcept()));
                     });
                   },
                 ),
+                onTap: (){
+                  setState((){
+                    _character = SingingCharacter.lafayette;
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareAnnouncementWithAllDepartmentsExcept()));
+                  });
+                },
               ),
             ),
           ),
@@ -78,17 +90,24 @@ class _EventPrivacyState extends State<EventPrivacy> {
                   onChanged: (SingingCharacter? value) {
                     setState(() {
                       _character = value;
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareWithOnly()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareAnnouncementOnlyWith()));
                     });
                   },
                 ),
+                onTap: (){
+                  setState((){
+                    _character = SingingCharacter.just;
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareAnnouncementOnlyWith()));
+                  });
+
+                },
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: const Text('NOTE: Changes applied now won\'t affect events you\'ve already posted'),
+              child: const Text('NOTE: Changes applied now won\'t affect announcements you\'ve already posted'),
             ),
           ),
         ],

@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'app.dart';
+import 'SignupAndSignin/signup_and_sign_in_page.dart';
 import 'firebase_options.dart';
 
 void main() async{
@@ -29,7 +29,7 @@ class Main extends StatelessWidget {
         splashTransition: SplashTransition.slideTransition,
         backgroundColor: Colors.deepPurple.shade400,
         splash: const Center(child: Text('Work Space'),),
-        nextScreen: const App(),
+        nextScreen: const LoginScreen(),
       ),
     );
   }
