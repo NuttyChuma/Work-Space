@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:get/get.dart';
 import 'package:work_space/Feed/AddAnnouncement/announcement_privacy.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+
+import '../FeedController/feed_controller.dart';
 
 class AddAnnouncement extends StatefulWidget {
   const AddAnnouncement({Key? key}) : super(key: key);
@@ -17,7 +20,10 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
   String dateMessage = 'YYYY-MM-DD HH:MM';
   String announcementMessage = '';
 
+  final feedController = Get.find<FeedController>();
+
   submitEvent() async{
+    Get.back();
     var uuid = const Uuid();
     Map<String, dynamic> event = {
       'announcement': announcementMessage,
@@ -26,16 +32,16 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
       'name': 'Liliane Weiner',
     };
 
-    String uri = 'http://192.168.3.68:5000/';
+    String uri = 'http://192.168.3.124:5000/';
     await http.post(Uri.parse("${uri}postAnnouncement"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
         },
         body: jsonEncode(event));
-    Navigator.pop(context);
-    debugPrint(announcementMessage);
-    debugPrint(dateMessage);
+    await feedController.getFeed();
+    // debugPrint(announcementMessage);
+    // debugPrint(dateMessage);
   }
 
   @override
@@ -53,10 +59,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
               PopupMenuButton(
                 onSelected: (value) {
                   if (value == 1) {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AnnouncementPrivacy()));
+                    Get.to(()=>const AnnouncementPrivacy());
                   }
                 },
                 itemBuilder: (context) => [

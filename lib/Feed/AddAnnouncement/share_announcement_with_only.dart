@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 
 class ShareAnnouncementOnlyWith extends StatefulWidget {
@@ -78,6 +80,7 @@ class _ShareAnnouncementOnlyWithState extends State<ShareAnnouncementOnlyWith> {
       child: Scaffold(
         backgroundColor: Colors.deepPurple.shade100,
         body: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
               backgroundColor: Colors.deepPurple.shade300,
@@ -161,7 +164,7 @@ class _ShareAnnouncementOnlyWithState extends State<ShareAnnouncementOnlyWith> {
           elevation: 0.0,
           onPressed: () {
             updateDepartmentsSharedWithList();
-            Navigator.pop(context);
+            Get.back();
           },
           child: const Icon(Icons.check_rounded, size: 30, color: Colors.white,),
 
@@ -194,7 +197,7 @@ class _ShareAnnouncementOnlyWithState extends State<ShareAnnouncementOnlyWith> {
             actions: [
               TextButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Get.back();
                   },
                   child: const Text(
                     'CANCEL',
@@ -202,8 +205,8 @@ class _ShareAnnouncementOnlyWithState extends State<ShareAnnouncementOnlyWith> {
                   )),
               TextButton(
                   onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
+                    Get.back();
+                    Get.back();
                   },
                   child: const Text(
                     'DISCARD',

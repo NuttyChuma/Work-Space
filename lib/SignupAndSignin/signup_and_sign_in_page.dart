@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:work_space/uri.dart';
 
-import '../app.dart';
+import '../Chats/Controllers/chats_controller.dart';
+import '../Chats/Controllers/colleagues_controller.dart';
+import '../Home/home.dart';
 
-// Uri to the API
-String uri = "http://192.168.3.68:5000/";
 
-String? username, userEmail, department;
+String? username, userEmail, department, userId;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -28,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
 
-  checkIfAlreadySignedIn() async{
+  checkIfAlreadySignedIn() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String? tmpUsername = sharedPreferences.getString('username');
     String? tmpUserEmail = sharedPreferences.getString('email');
@@ -38,19 +41,15 @@ class _LoginScreenState extends State<LoginScreen> {
     debugPrint(tmpUserEmail);
     debugPrint(tmpUserDepartment);
 
-    if(tmpUsername != null && tmpUserEmail != null && tmpUserDepartment != null){
-      goToApp();
+    if (tmpUsername != null &&
+        tmpUserEmail != null &&
+        tmpUserDepartment != null) {
+      Get.off(() => const App());
     }
-  }
-  goToApp(){
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (BuildContext context) => const App()),
-            (Route<dynamic> route) => false);
   }
 
   Future<String?> _authUser(LoginData data) async {
-    var result = await http.post(Uri.parse("${uri}login"),
+    var result = await http.post(Uri.parse("${MyUri().uri}login"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
@@ -62,19 +61,20 @@ class _LoginScreenState extends State<LoginScreen> {
     var json = jsonDecode(result.body);
 
     bool isSuccessful = json['isSuccessful'];
-    Map<String, dynamic> userData ={};
-    if(json['userData'] != null){
+    Map<String, dynamic> userData = json['userData'];
+    if (json['userData'] != null) {
       userData = json['userData'];
     }
-    if(!isSuccessful){
+    if (!isSuccessful) {
       return 'Email And Password Combination Does\'t match our database';
     }
 
     userEmail = userData['email'];
     username = '${userData['firstName']} ${userData['lastName']}';
     department = userData['department'];
+    userId = userData['uuid'];
 
-    // debugPrint(username);
+    // debugPrint(userId);
     // debugPrint(userEmail);
     // debugPrint(department);
 
@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
     debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
 
     var uuid = const Uuid();
-    var result = await http.post(Uri.parse("${uri}signup"),
+    var result = await http.post(Uri.parse("${MyUri().uri}signup"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
@@ -100,17 +100,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
     bool doesNotExist = json['doesNotExist'];
     bool alreadyExists = json['alreadyExists'];
-    Map<String, dynamic> userData ={};
-    if(json['userData'] != null){
+    Map<String, dynamic> userData = {};
+    if (json['userData'] != null) {
       userData = json['userData'];
     }
-    if(doesNotExist || alreadyExists){
+    if (doesNotExist || alreadyExists) {
       return 'User Does Not Work In The Company Or\nUser Already Exists';
     }
 
     userEmail = userData['email'];
     username = '${userData['firstName']} ${userData['lastName']}';
     department = userData['department'];
+    userId = uuid.toString();
 
     // debugPrint(username);
     // debugPrint(userEmail);
@@ -121,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<String?> _recoverPassword(String name) async {
     debugPrint('Name: $name');
-    await http.post(Uri.parse("${uri}auth/reset/"),
+    await http.post(Uri.parse("${MyUri().uri}auth/reset/"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
@@ -144,20 +145,26 @@ class _LoginScreenState extends State<LoginScreen> {
           titleStyle: const TextStyle(color: Colors.white)),
       onLogin: _authUser,
       onSignup: _signupUser,
-      onSubmitAnimationCompleted: () async{
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (BuildContext context) => const App()),
-              (Route<dynamic> route) => false);
+      onSubmitAnimationCompleted: () async {
+        Get.off(() => const App());
 
-          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-          sharedPreferences.setString('username', username!);
-          sharedPreferences.setString('email', userEmail!);
-          sharedPreferences.setString('department', department!);
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
+        sharedPreferences.setString('username', username!);
+        sharedPreferences.setString('email', userEmail!);
+        sharedPreferences.setString('department', department!);
+        sharedPreferences.setString('userId', userId!);
 
-          debugPrint(sharedPreferences.getString('username'));
-          debugPrint(sharedPreferences.getString('email'));
-          debugPrint(sharedPreferences.getString('department'));
+        debugPrint(sharedPreferences.getString('username'));
+        debugPrint(sharedPreferences.getString('email'));
+        debugPrint(sharedPreferences.getString('department'));
+        debugPrint(sharedPreferences.getString('userId'));
+
+        final colleaguesController = Get.find<ColleaguesController>();
+        colleaguesController.getChats();
+
+        final chatsController = Get.find<ChatsController>();
+        chatsController.getMessages();
       },
       onRecoverPassword: _recoverPassword,
       messages: LoginMessages(

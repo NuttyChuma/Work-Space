@@ -1,9 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'Chats/chats.dart';
-import 'Feed/feed.dart';
-import 'Profile/profile.dart';
+import '../Chats/Views/chats_view.dart';
+import '../Feed/FeedView/feed.dart';
+import '../Profile/profile.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);

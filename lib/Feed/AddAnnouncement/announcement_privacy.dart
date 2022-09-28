@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:work_space/Feed/AddAnnouncement/share_announcement_with_all_departments_except.dart';
 import 'package:work_space/Feed/AddAnnouncement/share_announcement_with_only.dart';
 
@@ -90,16 +92,15 @@ class _AnnouncementPrivacyState extends State<AnnouncementPrivacy> {
                   onChanged: (SingingCharacter? value) {
                     setState(() {
                       _character = value;
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareAnnouncementOnlyWith()));
+                      Get.to(()=>const ShareAnnouncementOnlyWith());
                     });
                   },
                 ),
                 onTap: (){
                   setState((){
                     _character = SingingCharacter.just;
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const ShareAnnouncementOnlyWith()));
+                    Get.to(()=>const ShareAnnouncementOnlyWith());
                   });
-
                 },
               ),
             ),
