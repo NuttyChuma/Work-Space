@@ -20,6 +20,7 @@ void main() async{
 
   final chatsController = Get.put(ChatsController());
   chatsController.getMessages();
+  chatsController.listenToDatabase();
   runApp(const Main());
 }
 

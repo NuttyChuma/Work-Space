@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,10 +10,10 @@ import 'package:work_space/uri.dart';
 class ChatsController extends GetxController {
   var messages = [].obs;
   var messagesWithUser = [].obs;
+  var chatId = '';
 
   getMessages() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    // debugPrint(preferences.getString('userId')!);
     await http.post(Uri.parse('${MyUri().uri}getMessages'), headers: <String, String>{
       "Accept": "application/json",
       "Content-Type": "application/json; charset=UTF-8",
@@ -20,14 +22,20 @@ class ChatsController extends GetxController {
         'userId': preferences.getString('userId')
       })
     ).then((response) {
-      // debugPrint(response.body);
+      // messages([]);
       messages(jsonDecode(response.body).toList());
+      debugPrint('${messages[0]['latestMessage']['message']}');
+      messages.sort((m1, m2) {
+        var r = m1['latestMessage']["sentAt"].compareTo(m2['latestMessage']["sentAt"]);
+        if (r != 0) return r;
+        return m1['latestMessage']["sentAt"].compareTo(m2['latestMessage']["sentAt"]);
+      });
+      messages = messages.reversed.toList().obs;
     });
   }
 
   sendMessage(message) async {
     messagesWithUser.add(message);
-    // debugPrint('$message');
     await http.post(Uri.parse('${MyUri().uri}sendMessage'), headers: <String, String>{
       "Accept": "application/json",
       "Content-Type": "application/json; charset=UTF-8",
@@ -37,21 +45,58 @@ class ChatsController extends GetxController {
       })
     ).then((response) {
       getMessages();
-      // messages(jsonDecode(response.body).toList());
-      // debugPrint('$messages');
     });
   }
 
   fetchMessages(String chatId){
-    // debugPrint('$messages');
+    this.chatId = chatId;
     for(var message in messages){
       var tmp = message['messages'];
       tmp.forEach((key,value){
-        // debugPrint('$value');
         if(chatId == value['message']['chatId']){
           messagesWithUser.add(value['message']);
         }
       });
     }
+  }
+
+  listenToDatabase() async{
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String userId = preferences.getString('userId')!;
+
+    DatabaseReference starCountRef =
+    FirebaseDatabase.instance.ref('messages/$userId/');
+    starCountRef.onValue.listen((DatabaseEvent event) async {
+      if(event.snapshot.exists){
+        debugPrint('Hello We Are Listening');
+        await getMessages();
+        messagesWithUser([]);
+        if(chatId.isNotEmpty){
+          await fetchMessages(chatId);
+        }
+        List newMessages = [];
+        for(var message in messages){
+          var tmp = message['messages'];
+          tmp.forEach((key,value){
+            newMessages.add(value['message']);
+          });
+        }
+
+        newMessages.sort((m1, m2) {
+          var r = m1["sentAt"].compareTo(m2["sentAt"]);
+          if (r != 0) return r;
+          return m1["sentAt"].compareTo(m2["sentAt"]);
+        });
+
+        if(newMessages[newMessages.length-1]['from'] != preferences.getString('username')){
+          Get.snackbar(
+            newMessages[newMessages.length-1]['from'],
+            newMessages[newMessages.length-1]['message'],
+            icon: const Icon(Icons.person, color: Colors.white),
+          );
+        }
+      }
+    });
+    debugPrint('Hello');
   }
 }

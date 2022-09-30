@@ -115,55 +115,11 @@ class _ColleaguesState extends State<Colleagues> {
                     childCount: colleaguesController.colleagues.length,
                   ),
                 ),
-                // (colleaguesController.colleagues.isNotEmpty)
-                //     ? SliverList(
-                //         delegate: SliverChildBuilderDelegate(
-                //           (context, index) {
-                //             return Container(
-                //                 // height: 60.0,
-                //                 color: Colors.deepPurple.shade100,
-                //                 child: Column(
-                //                   children: [
-                //                     ListTile(
-                //                       leading: CircleAvatar(
-                //                         backgroundColor:
-                //                             Colors.deepPurple.shade600,
-                //                         child: Text(
-                //                             '${colleaguesController.colleagues[index]['firstName'][0]}'),
-                //                       ),
-                //                       title: Text(
-                //                           '${colleaguesController.colleagues[index]['firstName']} ${colleaguesController.colleagues[index]['lastName']}'),
-                //                       subtitle: Text(
-                //                           'From ${colleaguesController.colleagues[index]['department']}'),
-                //                       onTap: () {
-                //                         openDialog(index);
-                //                       },
-                //                     ),
-                //                     const Divider(
-                //                       thickness: 2.0,
-                //                     ),
-                //                   ],
-                //                 ));
-                //           },
-                //           childCount: colleaguesController.colleagues.length,
-                //         ),
-                //       )
-                //     : SliverToBoxAdapter(
-                //         child: SizedBox(
-                //           height: MediaQuery.of(context).size.height,
-                //           child: Center(
-                //             child: CircularProgressIndicator(
-                //               color: Colors.deepPurple.shade600,
-                //             ),
-                //           ),
-                //         ),
-                //       ),
               ],
             )));
   }
 
   Future openDialog(int index, bool isOnWorkSpace) {
-    // debugPrint('${colleaguesController.colleagues[index]}');
     String username =
         '${colleaguesController.colleaguesOnWorkSpace[index]['firstName']} ${colleaguesController.colleaguesOnWorkSpace[index]['lastName']}';
     return showDialog(
@@ -203,7 +159,6 @@ class _ColleaguesState extends State<Colleagues> {
                         }
                         debugPrint(chatId);
                         chatsController.fetchMessages(chatId);
-                        // debugPrint('${chatsController.messagesWithUser}');
                         Get.back();
                         String friendName =
                             '${colleaguesController.colleaguesOnWorkSpace[index]['firstName']} ${colleaguesController.colleaguesOnWorkSpace[index]['lastName']}';

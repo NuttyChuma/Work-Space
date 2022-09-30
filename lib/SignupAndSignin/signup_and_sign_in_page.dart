@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<String?> _signupUser(SignupData data) async {
     debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
 
-    var uuid = const Uuid();
+    String uuid = const Uuid().v1();
     var result = await http.post(Uri.parse("${MyUri().uri}signup"),
         headers: <String, String>{
           "Accept": "application/json",
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
         body: jsonEncode(<String, String>{
           "email": data.name as String,
           "password": data.password as String,
-          "uuid": uuid.v1(),
+          "uuid": uuid,
         }));
     var json = jsonDecode(result.body);
     debugPrint('$json');
@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
     userEmail = userData['email'];
     username = '${userData['firstName']} ${userData['lastName']}';
     department = userData['department'];
-    userId = uuid.toString();
+    userId = uuid;
 
     // debugPrint(username);
     // debugPrint(userEmail);

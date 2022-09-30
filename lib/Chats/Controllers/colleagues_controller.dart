@@ -9,7 +9,6 @@ class ColleaguesController extends GetxController{
   var colleagues = [].obs;
   var colleaguesOnWorkSpace = [].obs;
   getChats() async{
-
     await http
         .get(Uri.parse('${MyUri().uri}getAllUsers'), headers: <String, String>{
       "Accept": "application/json",

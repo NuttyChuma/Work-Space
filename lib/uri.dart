@@ -1,3 +1,3 @@
 class MyUri{
-  String uri = 'http://192.168.3.189:5000/';
+  String uri = 'http://192.168.19.18:5000/';
 }
