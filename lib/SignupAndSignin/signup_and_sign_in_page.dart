@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
@@ -61,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
     var json = jsonDecode(result.body);
 
     bool isSuccessful = json['isSuccessful'];
-    Map<String, dynamic> userData = json['userData'];
+    Map<String, dynamic> userData = {};
     if (json['userData'] != null) {
       userData = json['userData'];
     }

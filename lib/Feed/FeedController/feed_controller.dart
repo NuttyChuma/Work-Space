@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:work_space/uri.dart';
@@ -16,6 +15,6 @@ class FeedController extends GetxController {
     });
 
     feed(jsonDecode(result.body).toList());
-    debugPrint('$feed');
+    // debugPrint('$feed');
   }
 }

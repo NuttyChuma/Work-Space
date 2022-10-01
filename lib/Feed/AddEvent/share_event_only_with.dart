@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:work_space/uri.dart';
 
 class ShareWithOnly extends StatefulWidget {
   const ShareWithOnly({Key? key}) : super(key: key);
@@ -18,28 +20,32 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
   }
 
   List? departments;
-  List? departmentsSharedWithList = [''];
+  List? departmentsSharedWithList = [];
   String? departmentsSelected;
 
   getDepartments() async {
-    String uri = 'http://192.168.3.68:5000/';
-    var result = await http
-        .get(Uri.parse('${uri}getAllDepartments'), headers: <String, String>{
-      "Accept": "application/json",
-      "Content-Type": "application/json; charset=UTF-8",
-    });
-    var departmentsSharedWith = await http
-        .get(
-        Uri.parse('${uri}departmentsSharedWithList'), headers: <String, String>{
-      "Accept": "application/json",
-      "Content-Type": "application/json; charset=UTF-8",
-    });
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    var result = await http.get(Uri.parse('${MyUri().uri}getAllDepartments'),
+        headers: <String, String>{
+          "Accept": "application/json",
+          "Content-Type": "application/json; charset=UTF-8",
+        });
+
+    var departmentsSharedWith = await http.post(
+        Uri.parse('${MyUri().uri}departmentsSharedWithList'),
+        headers: <String, String>{
+          "Accept": "application/json",
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: jsonEncode(
+            <String, String>{'userId': preferences.getString('userId')!}));
 
     departments = jsonDecode(result.body).toList();
     departmentsSharedWithList = jsonDecode(departmentsSharedWith.body).toList();
-    if (departmentsSharedWithList!.length > 1) {
+    if (departmentsSharedWithList!.isNotEmpty) {
       departmentsSelected =
-      '${departmentsSharedWithList!.length - 1} departments selected';
+          '${departmentsSharedWithList!.length} departments selected';
     } else {
       departmentsSelected = 'No departments selected';
     }
@@ -47,19 +53,19 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
   }
 
   updateDepartmentsSharedWithList() async {
-    String uri = 'http://192.168.3.68:5000/';
-    await http.post(Uri.parse("${uri}updateDepartmentsSharedWithList"),
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await http.post(Uri.parse("${MyUri().uri}updateDepartmentsSharedWithList"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
         },
         body: jsonEncode(<String, dynamic>{
           "departmentsSharedWithList": departmentsSharedWithList,
-          "userIndex": 0,
+          "userIndex": preferences.getString('userId')!,
         }));
-    if (departmentsSharedWithList!.length > 1) {
+    if (departmentsSharedWithList!.isNotEmpty) {
       departmentsSelected =
-      '${departmentsSharedWithList!.length - 1} departments selected';
+          '${departmentsSharedWithList!.length} departments selected';
     } else {
       departmentsSelected = 'No departments selected';
     }
@@ -77,90 +83,101 @@ class _ShareWithOnlyState extends State<ShareWithOnly> {
             floating: true,
             pinned: true,
             title: ListTile(
-              title: const Text('Only share event with...', style: TextStyle(
-                  fontWeight: FontWeight.w500, color: Colors.white),),
-              subtitle: (departmentsSelected != null) ? Text(
-                departmentsSelected!,
-                style: const TextStyle(color: Colors.white),):
-                  const Text(""),
+              title: const Text(
+                'Only share event with...',
+                style:
+                    TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+              ),
+              subtitle: (departmentsSelected != null)
+                  ? Text(
+                      departmentsSelected!,
+                      style: const TextStyle(color: Colors.white),
+                    )
+                  : const Text(""),
             ),
-
           ),
           (departments != null)
               ? SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                return Container(
-                  // height: 60.0,
-                    color: Colors.deepPurple.shade100,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.deepPurple.shade600,
-                            child: Text(
-                                '${departments![index][0]}'),
-                          ),
-                          title: Text(
-                              '${departments![index]}'),
-                          trailing: (!departmentsSharedWithList!.contains(
-                              departments![index])) ? const Icon(
-                            Icons.circle_outlined, size: 27,) : const Icon(
-                              Icons.check_circle),
-                          onTap: () {
-                            setState(() {
-                              if (departmentsSharedWithList!.contains(
-                                  departments![index])) {
-                                departmentsSharedWithList!.remove(
-                                    departments![index]);
-                              } else {
-                                departmentsSharedWithList!.add(
-                                    departments![index]);
-                              }
-                              if (departmentsSharedWithList!.length > 1) {
-                                departmentsSelected =
-                                '${departmentsSharedWithList!.length -
-                                    1} departments selected';
-                              } else {
-                                departmentsSelected = 'No departments selected';
-                              }
-                            });
-                          },
-                        ),
-                        const Divider(
-                          thickness: 2.0,
-                        ),
-                      ],
-                    ));
-              },
-              childCount: departments!.length,
-            ),
-          )
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return Container(
+                          // height: 60.0,
+                          color: Colors.deepPurple.shade100,
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.deepPurple.shade600,
+                                  child: Text('${departments![index][0]}'),
+                                ),
+                                title: Text('${departments![index]}'),
+                                trailing: (!departmentsSharedWithList!
+                                        .contains(departments![index]))
+                                    ? const Icon(
+                                        Icons.circle_outlined,
+                                        size: 27,
+                                      )
+                                    : Icon(Icons.check_circle,
+                                    color: Colors.deepPurple.shade900
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    if (departmentsSharedWithList!
+                                        .contains(departments![index])) {
+                                      departmentsSharedWithList!
+                                          .remove(departments![index]);
+                                    } else {
+                                      departmentsSharedWithList!
+                                          .add(departments![index]);
+                                    }
+                                    if (departmentsSharedWithList!.isNotEmpty) {
+                                      departmentsSelected =
+                                          '${departmentsSharedWithList!.length} departments selected';
+                                    } else {
+                                      departmentsSelected =
+                                          'No departments selected';
+                                    }
+                                  });
+                                },
+                              ),
+                              const Divider(
+                                thickness: 2.0,
+                              ),
+                            ],
+                          ));
+                    },
+                    childCount: departments!.length,
+                  ),
+                )
               : SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.deepPurple.shade600,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.deepPurple.shade600,
+                      ),
+                    ),
+                  ),
                 ),
-              ),),),
           const SliverToBoxAdapter(
-            child: ListTile(title: Text(""),),
+            child: ListTile(
+              title: Text(""),
+            ),
           )
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green.shade500,
+        backgroundColor: Colors.deepPurple.shade600,
         elevation: 0.0,
         onPressed: () {
           updateDepartmentsSharedWithList();
           Navigator.pop(context);
         },
-        child: const Icon(Icons.check_rounded, size: 30, color: Colors.white,),
-
+        child: const Icon(
+          Icons.check_rounded,
+          size: 30,
+          color: Colors.white,
+        ),
       ),
     );
   }

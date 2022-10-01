@@ -14,7 +14,9 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  Get.put(FeedController());
+  final feedController = Get.put(FeedController());
+  feedController.getFeed();
+
   final colleaguesController = Get.put(ColleaguesController());
   colleaguesController.getChats();
 

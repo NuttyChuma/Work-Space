@@ -11,6 +11,8 @@ class ChatsController extends GetxController {
   var messages = [].obs;
   var messagesWithUser = [].obs;
   var chatId = '';
+  var isLaunch = true;
+  var avoidSecondSnackBar = false;
 
   getMessages() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -22,15 +24,18 @@ class ChatsController extends GetxController {
         'userId': preferences.getString('userId')
       })
     ).then((response) {
-      // messages([]);
-      messages(jsonDecode(response.body).toList());
-      debugPrint('${messages[0]['latestMessage']['message']}');
-      messages.sort((m1, m2) {
-        var r = m1['latestMessage']["sentAt"].compareTo(m2['latestMessage']["sentAt"]);
-        if (r != 0) return r;
-        return m1['latestMessage']["sentAt"].compareTo(m2['latestMessage']["sentAt"]);
-      });
-      messages = messages.reversed.toList().obs;
+      List responseList = jsonDecode(response.body).toList();
+      if(responseList.isNotEmpty){
+        messages(responseList);
+        // debugPrint('${messages[0]['latestMessage']['message']}');
+        messages.sort((m1, m2) {
+          var r = m1['latestMessage']["sentAt"].compareTo(m2['latestMessage']["sentAt"]);
+          if (r != 0) return r;
+          return m1['latestMessage']["sentAt"].compareTo(m2['latestMessage']["sentAt"]);
+        });
+        messages = messages.reversed.toList().obs;
+      }
+
     });
   }
 
@@ -50,6 +55,7 @@ class ChatsController extends GetxController {
 
   fetchMessages(String chatId){
     this.chatId = chatId;
+    messagesWithUser([]);
     for(var message in messages){
       var tmp = message['messages'];
       tmp.forEach((key,value){
@@ -62,7 +68,7 @@ class ChatsController extends GetxController {
 
   listenToDatabase() async{
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String userId = preferences.getString('userId')!;
+    String? userId = preferences.getString('userId');
 
     DatabaseReference starCountRef =
     FirebaseDatabase.instance.ref('messages/$userId/');
@@ -87,16 +93,26 @@ class ChatsController extends GetxController {
           if (r != 0) return r;
           return m1["sentAt"].compareTo(m2["sentAt"]);
         });
+        debugPrint('${newMessages[newMessages.length-1]['message']}');
 
-        if(newMessages[newMessages.length-1]['from'] != preferences.getString('username')){
-          Get.snackbar(
-            newMessages[newMessages.length-1]['from'],
-            newMessages[newMessages.length-1]['message'],
-            icon: const Icon(Icons.person, color: Colors.white),
-          );
+        if(newMessages[newMessages.length-1]['from'] != preferences.getString('username') && !isLaunch){
+          if(!avoidSecondSnackBar){
+            Get.snackbar(
+              newMessages[newMessages.length-1]['from'],
+              newMessages[newMessages.length-1]['message'],
+              icon: const Icon(Icons.person, color: Colors.white),
+            );
+            avoidSecondSnackBar = true;
+          }else{
+            avoidSecondSnackBar = false;
+          }
+        }else{
+          isLaunch = false;
         }
       }
     });
-    debugPrint('Hello');
+    // debugPrint('Hello');
   }
 }
+
+// tbernardoni@shutterfly.com

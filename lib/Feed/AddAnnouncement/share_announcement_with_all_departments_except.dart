@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:work_space/uri.dart';
 
 class ShareAnnouncementWithAllDepartmentsExcept extends StatefulWidget {
   const ShareAnnouncementWithAllDepartmentsExcept({Key? key}) : super(key: key);
@@ -20,31 +22,34 @@ class _ShareAnnouncementWithAllDepartmentsExceptState
   }
 
   List? departments;
-  List? announcementDepartmentsHiddenFromList;
+  List? announcementDepartmentsHiddenFromList = [];
   List? initialAnnouncementDepartmentsHiddenFromList;
   String? departmentsExcluded;
 
   getDepartments() async {
-    String uri = 'http://192.168.3.68:5000/';
-    var result = await http
-        .get(Uri.parse('${uri}getAllDepartments'), headers: <String, String>{
-      "Accept": "application/json",
-      "Content-Type": "application/json; charset=UTF-8",
-    });
-    var hiddenDepartments = await http.get(
-        Uri.parse('${uri}announcementDepartmentsHiddenFromList'),
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    var result = await http.get(Uri.parse('${MyUri().uri}getAllDepartments'),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
         });
+    var hiddenDepartments = await http.post(
+        Uri.parse('${MyUri().uri}announcementDepartmentsHiddenFromList'),
+        headers: <String, String>{
+          "Accept": "application/json",
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: jsonEncode(
+            <String, String>{'userId': preferences.getString('userId')!}));
 
     departments = jsonDecode(result.body).toList();
     announcementDepartmentsHiddenFromList =
         jsonDecode(hiddenDepartments.body).toList();
-    initialAnnouncementDepartmentsHiddenFromList = List<String>.from(announcementDepartmentsHiddenFromList!);
-    if (announcementDepartmentsHiddenFromList!.length > 1) {
+    initialAnnouncementDepartmentsHiddenFromList =
+        List<String>.from(announcementDepartmentsHiddenFromList!);
+    if (announcementDepartmentsHiddenFromList!.isNotEmpty) {
       departmentsExcluded =
-          '${announcementDepartmentsHiddenFromList!.length - 1} departments excluded';
+          '${announcementDepartmentsHiddenFromList!.length} departments excluded';
     } else {
       departmentsExcluded = 'No departments excluded';
     }
@@ -52,9 +57,9 @@ class _ShareAnnouncementWithAllDepartmentsExceptState
   }
 
   updateHiddenDepartmentsList() async {
-    String uri = 'http://192.168.3.68:5000/';
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     await http.post(
-        Uri.parse("${uri}updateAnnouncementDepartmentsHiddenFromList"),
+        Uri.parse("${MyUri().uri}updateAnnouncementDepartmentsHiddenFromList"),
         headers: <String, String>{
           "Accept": "application/json",
           "Content-Type": "application/json; charset=UTF-8",
@@ -62,7 +67,7 @@ class _ShareAnnouncementWithAllDepartmentsExceptState
         body: jsonEncode(<String, dynamic>{
           "announcementDepartmentsHiddenFromList":
               announcementDepartmentsHiddenFromList,
-          "userIndex": 0,
+          "userIndex": preferences.getString('userId')!,
         }));
   }
 
@@ -132,10 +137,9 @@ class _ShareAnnouncementWithAllDepartmentsExceptState
                                             .add(departments![index]);
                                       }
                                       if (announcementDepartmentsHiddenFromList!
-                                              .length >
-                                          1) {
+                                          .isNotEmpty) {
                                         departmentsExcluded =
-                                            '${announcementDepartmentsHiddenFromList!.length - 1} departments excluded';
+                                            '${announcementDepartmentsHiddenFromList!.length} departments excluded';
                                       } else {
                                         departmentsExcluded =
                                             'No departments excluded';
@@ -189,17 +193,17 @@ class _ShareAnnouncementWithAllDepartmentsExceptState
 
   Future? openDialog() {
     bool changes = false;
-    for(String department in initialAnnouncementDepartmentsHiddenFromList!){
-      if(!announcementDepartmentsHiddenFromList!.contains(department)){
+    for (String department in initialAnnouncementDepartmentsHiddenFromList!) {
+      if (!announcementDepartmentsHiddenFromList!.contains(department)) {
         changes = true;
       }
     }
-    for(String department in announcementDepartmentsHiddenFromList!){
-      if(!initialAnnouncementDepartmentsHiddenFromList!.contains(department)){
+    for (String department in announcementDepartmentsHiddenFromList!) {
+      if (!initialAnnouncementDepartmentsHiddenFromList!.contains(department)) {
         changes = true;
       }
     }
-    if(changes){
+    if (changes) {
       return showDialog(
         context: context,
         builder: (BuildContext context) {
